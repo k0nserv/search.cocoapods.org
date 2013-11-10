@@ -51,71 +51,7 @@ class CocoapodSearch < Sinatra::Application
   set :public_folder, File.dirname(__FILE__)
   set :views,         File.expand_path('../views', __FILE__)
 
-  # Root, the search page.
-  #
-  get '/' do
-    @query = params[:q]
-    @platform = Platform.extract_from @query
-    
-    haml :index, :layout => :search
-  end
-
-  # Renders the results into the json.
-  #
-  # You get the results from the (local) picky server and then
-  # populate the result hash with rendered models.
-  #
-  get '/search' do
-    results = search.interface.search params[:query], params[:ids] || 20, params[:offset] || 0
-    results = results.to_hash
-    results.extend Picky::Convenience
-    results.populate_with Pod::View do |pod|
-      pod.render
-    end
-    Yajl::Encoder.encode results
-  end
-  
-  # Note: Prototyping code.
-  #
-  get '/pod/:name' do
-    pod = pods.specs[params[:name]]
-    if pod
-      @infos = pod.to_hash
-      name = @infos['name']
-      authors = @infos['authors']
-      
-      # Search for authors' other pods.
-      #
-      @authors = {}
-      authors = if authors.respond_to? :keys
-        authors.keys
-      else
-        [authors]
-      end
-      authors.each do |name|
-        names = name.split
-        results = search.interface.search names.map { |name| "author:#{name}" }.join(' ')
-        @authors[name] = results.ids
-      end
-      
-      # Get topic from pod and search for that topic.
-      #
-      @tags = {}
-      tags = Pod::View.content[name].tags
-      tags.each do |name|
-        names = name.split
-        results = search.interface.search names.map { |name| "tag:#{name}" }.join(' ')
-        @tags[name] = results.ids
-      end
-      
-      haml :pod, :layout => :search
-    else
-      status(404)
-      body("Pod not found.")
-    end
-  end
-
-  # Install get and post hooks.
+  # Install get and post hooks for pod indexing.
   #
   [:get, :post].each do |type|
     send type, "/post-receive-hook/#{ENV['HOOK_PATH']}" do
@@ -129,13 +65,6 @@ class CocoapodSearch < Sinatra::Application
         body e.message
       end
     end
-  end
-  
-  # API.
-  #
-  get '/api/v1/pod/:name.json' do
-    pod = pods.specs[params[:name]]
-    pod && pod.to_hash.to_json || status(404) && body("Pod not found.")
   end
 
   # Temporary for CocoaDocs till we separate out API & html 
@@ -154,7 +83,40 @@ class CocoapodSearch < Sinatra::Application
     
     Yajl::Encoder.encode simple_data
   end
-
+  
+  # API 2.0
+  #
+  
+  #
+  #
+  get '/api/v2.0/pods/search/picky/full' do
+    cors_allow_all
+    
+    picky_result search, params do |pod|
+      pod.render
+    end
+  end
+  
+  #
+  #
+  get '/api/v2.0/pods/search/short' do
+    cors_allow_all
+    
+    flat_result search, params do |pod|
+      pod.render_short_json
+    end
+  end
+  
+  #
+  #
+  get '/api/v2.0/pods/search/ids' do
+    cors_allow_all
+    
+    flat_result search, params do |pod|
+      pod.id
+    end
+  end
+  
   require File.expand_path('../helpers', __FILE__)
 
 end
