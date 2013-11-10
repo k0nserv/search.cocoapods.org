@@ -5,7 +5,7 @@ require 'picky-client/spec'
 
 # Uses the fixed set of pods from the ./data directory.
 #
-describe 'Integration Tests' do
+describe 'Search Integration Tests' do
   
   before(:all) do
     Picky::Indexes.index
@@ -13,7 +13,7 @@ describe 'Integration Tests' do
     CocoapodSearch.prepare # Needed to load the data for the rendered search results.
   end
 
-  let(:pods) { Picky::TestClient.new(CocoapodSearch, :path => '/search') }
+  let(:pods) { Picky::TestClient.new(CocoapodSearch, :path => '/api/v2.0/pods/search/picky/full') }
   
   # Testing a count of results.
   #
