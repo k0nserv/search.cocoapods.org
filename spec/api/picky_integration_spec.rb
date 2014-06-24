@@ -15,7 +15,7 @@ describe 'Integration Tests' do
   
   # Testing the format.
   #
-  ok { pod_ids.search('on:osx kiwi').entries.should == ['Kiwi'] }
+  ok { pod_ids.search('on:osx abmulti').entries.should == ['ABMultiton'] }
   
   def pods
     @pods ||= Picky::TestClient.new CocoapodSearch, :path => '/api/v1/pods.picky.hash.json'
@@ -23,51 +23,51 @@ describe 'Integration Tests' do
 
   # Testing a count of results.
   #
-  ok { pods.search('on:ios 1.0.0').total.should == 66 }
+  ok { pods.search('on:ios 1.0.0').total.should == 45 }
   
   # Testing the format.
   #
-  ok { pods.search('on:osx kiwi').entries.should == [{:id=>"Kiwi", :platforms=>["osx", "ios"], :version=>"2.1", :summary=>"A Behavior Driven Development library for iOS and OS X.", :authors=>{:"Allen Ding"=>"alding@gmail.com", :"Luke Redpath"=>"luke@lukeredpath.co.uk"}, :link=>"https://github.com/allending/Kiwi", :source=>{:git=>"https://github.com/allending/Kiwi.git", :tag=>"2.1"}, :subspecs=>[], :tags=>[]}] }
+  ok { pods.search('on:osx abmultiton').entries.should == [{:id=>"ABMultiton", :platforms=>["ios", "osx"], :version=>"1.0.0", :summary=>"Multiton is a better alternative to singleton.", :authors=>{:"Alexey Belkevich"=>"belkevich.alexey@gmail.com"}, :link=>"https://github.com/belkevich/multiton", :source=>{:git=>"https://github.com/belkevich/multiton.git", :tag=>"2.0.5"}, :subspecs=>[], :tags=>[]}] }
 
   # Testing a specific order of result ids.
   #
-  ok { pods.search('on:osx ki').ids.should == ["JSONKit", "KISSmetrics", "KissXML", "Kiwi", "MKNetworkKit", "MacMapKit", "KISSmetrics", "KLExpandingSelect", "LibYAML", "MTDates", "MTGeometry", "MTJSONDictionary", "MTJSONUtils", "MTPocket", "MTQueue", "MTStringAttributes"] }
+  ok { pods.search('on:osx ki').ids.should == ["ADNKit", "AFKissXMLRequestOperation", "AFKissXMLRequestOperation@aceontech", "AFKissXMLRequestOperation@tonyzonghui"] }
   
   # Speed.
   #
   it 'is fast enough' do
     require 'benchmark'
-    Benchmark.realtime { pods.search('on:osx k* a') }.should < 0.005 # seconds
+    Benchmark.realtime { pods.search('on:osx a* a') }.should < 0.005 # seconds
   end
 
   # Similarity on author.
   #
-  ok { pods.search('on:ios allan~').ids.should == ["Kiwi"] }
+  ok { pods.search('on:ios allan~').ids.should == ["AFS3Client"] }
   
   # Partial version search.
   #
-  ok { pods.search('on:osx kiwi 1').ids.should == ['Kiwi'] }
-  ok { pods.search('on:osx kiwi 1.').ids.should == ['Kiwi'] }
-  ok { pods.search('on:osx kiwi 1.0').ids.should == ['Kiwi'] }
-  ok { pods.search('on:osx kiwi 1.0.').ids.should == ['Kiwi'] }
-  ok { pods.search('on:osx kiwi 1.0.0').ids.should == ['Kiwi'] }
+  ok { pods.search('on:osx abmultiton 2').ids.should == ['ABMultiton'] }
+  ok { pods.search('on:osx abmultiton 2.').ids.should == ['ABMultiton'] }
+  ok { pods.search('on:osx abmultiton 2.0').ids.should == ['ABMultiton'] }
+  ok { pods.search('on:osx abmultiton 2.0.').ids.should == ['ABMultiton'] }
+  ok { pods.search('on:osx abmultiton 2.0.5').ids.should == ['ABMultiton'] }
   
   # Platform constrained search (platforms are AND-ed).
   #
-  ok { pods.search('on:osx allen').ids.should == ["Kiwi"] }
-  ok { pods.search('on:ios allen').ids.should == ["Kiwi"] }
-  ok { pods.search('on:osx on:ios allen').ids.should == ["Kiwi"] }
+  ok { pods.search('on:osx abmultiton').ids.should == ["ABMultiton"] }
+  ok { pods.search('on:ios abmultiton').ids.should == ["ABMultiton"] }
+  ok { pods.search('on:osx on:ios abmultiton').ids.should == ["ABMultiton"] }
   
   # Category boosting.
   #
   ok { categories_of(pods.search('on:osx k* a')).should == [["platform", "name"], ["platform", "author"]] }
-  ok { categories_of(pods.search('on:osx jsonkit')).should == [["platform", "name"]] }
+  ok { categories_of(pods.search('on:osx abmultiton')).should == [["platform", "name"]] }
   
   # Partial.
   #
   # Platform is only found when fully mentioned (i.e. no partial).
   #
-  ok { pods.search('platform:osx').total.should == 109 }
+  ok { pods.search('platform:osx').total.should == 34 }
   ok { pods.search('platform:os').total.should == 0 }
   ok { pods.search('platform:o').total.should == 0 }
   
@@ -80,20 +80,20 @@ describe 'Integration Tests' do
   
   # Qualifiers.
   #
-  ok { pods.search('name:kiwi').ids.should == ["Kiwi"] }
-  ok { pods.search('pod:kiwi').ids.should == ["Kiwi"] }
+  ok { pods.search('name:abmultiton').ids.should == ["ABMultiton"] }
+  ok { pods.search('pod:abmultiton').ids.should == ["ABMultiton"] }
   
-  ok { pods.search('author:allen').ids.should == ['Kiwi'] }
-  ok { pods.search('authors:allen').ids.should == ['Kiwi'] }
-  ok { pods.search('written:allen').ids.should == ['Kiwi'] }
-  ok { pods.search('writer:allen').ids.should == ['Kiwi'] }
-  ok { pods.search('by:allen').ids.should == ['Kiwi'] }
+  ok { pods.search('author:allen').ids.should == ['AFS3Client'] }
+  ok { pods.search('authors:allen').ids.should == ['AFS3Client'] }
+  ok { pods.search('written:allen').ids.should == ['AFS3Client'] }
+  ok { pods.search('writer:allen').ids.should == ['AFS3Client'] }
+  ok { pods.search('by:allen').ids.should == ['AFS3Client'] }
   
-  ok { pods.search('version:1.0.0').ids.should == ["JASidePanels", "JCDHTTPConnection", "JCNotificationBannerPresenter", "JDDroppableView", "JDFlipNumberView", "JGAFImageCache", "JJCachedAsyncViewDrawing", "JTTargetActionBlock", "JWT", "JXHTTP", "KGNoise", "KISSmetrics", "KJSimpleBinding", "KTOneFingerRotationGestureRecognizer", "KYArcTab", "KYCircleMenu", "Kiwi", "KoaPullToRefresh", "LARSBar", "LARSTorch"] }
+  ok { pods.search('version:1.0.0').ids.should == ["AAShareBubbles", "ABCalendarPicker", "ABGetMe", "ABMultiton", "ABStaticTableViewController", "ACColorKit", "ACDCryptsyAPI", "ACEAutocompleteBar", "ACEDrawingView", "ACEExpandableTextCell", "ACETelPrompt", "ACPButton", "ACPReminder", "ACPScrollMenu", "ADBActors", "ADBBackgroundCells", "ADBDownloadManager", "ADBIndexedTableView", "ADBReasonableTextView", "ADCExtensions"] }
   
   expected_dependencies = ["KeenClient"]
   
-  ok { pods.search('dependency:JSONKit').ids.should == expected_dependencies }
+  ok { pods.search('dependency:afnetworking').ids.should == expected_dependencies }
   ok { pods.search('dependencies:JSONKit').ids.should == expected_dependencies }
   ok { pods.search('depends:JSONKit').ids.should == expected_dependencies }
   ok { pods.search('using:JSONKit').ids.should == expected_dependencies }
